@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>やることリスト</title>
+<style>
+body{font-family:sans-serif;max-width:480px;margin:0 auto;padding:16px;background:#f5f7fa}
+h1{font-size:22px}
+.bar{background:#ddd;border-radius:10px;height:20px;overflow:hidden}
+#fill{background:#4caf50;height:100%;width:0;transition:width .3s}
+#pct{text-align:center;margin:8px 0 16px;font-weight:bold}
+form{display:flex;gap:8px;margin-bottom:12px}
+input[type=text]{flex:1;padding:10px;font-size:16px;border:1px solid #ccc;border-radius:8px}
+button{padding:10px 14px;border:0;border-radius:8px;background:#2196f3;color:#fff;font-size:16px}
+ul{padding:0}
+li{display:flex;align-items:center;gap:10px;background:#fff;padding:12px;margin-bottom:8px;border-radius:8px;list-style:none}
+li span{flex:1}
+li.done span{text-decoration:line-through;color:#999}
+li button{background:#e57373;padding:6px 10px}
+</style>
+</head>
+<body>
+<h1>📚 やることリスト</h1>
+<div class="bar"><div id="fill"></div></div>
+<div id="pct"></div>
+<form id="f"><input type="text" id="t" placeholder="課題を入力" required><button>追加</button></form>
+<ul id="list"></ul>
+<script>
+let tasks = JSON.parse(localStorage.getItem('tasks') || '[]');
+function save(){localStorage.setItem('tasks',JSON.stringify(tasks));render();}
+function render(){
+  const ul=document.getElementById('list');ul.innerHTML='';
+  tasks.forEach((k,i)=>{
+    const li=document.createElement('li');
+    if(k.done)li.className='done';
+    li.innerHTML=`<input type="checkbox" ${k.done?'checked':''}><span></span><button>削除</button>`;
+    li.querySelector('span').textContent=k.text;
+    li.querySelector('input').onchange=()=>{k.done=!k.done;save();};
+    li.querySelector('button').onclick=()=>{tasks.splice(i,1);save();};
+    ul.appendChild(li);
+  });
+  const d=tasks.filter(k=>k.done).length;
+  const p=tasks.length?Math.round(d/tasks.length*100):0;
+  document.getElementById('fill').style.width=p+'%';
+  document.getElementById('pct').textContent=`${d} / ${tasks.length} 完了(${p}%)`;
+}
+document.getElementById('f').onsubmit=e=>{
+  e.preventDefault();
+  const t=document.getElementById('t');
+  tasks.push({text:t.value,done:false});
+  t.value='';save();
+};
+render();
+</script>
+</body>
+</html>
